@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goodmen Expense</title>
+  <style>
+    body { font-family: sans-serif; background: #e0f7fa; color: #004d40; padding: 20px; }
+    input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; }
+    .entry { padding: 10px; margin: 10px 0; background: white; border-left: 5px solid #00acc1; }
+  </style>
+</head>
+<body>
+  <h2>Goodmen Expense</h2>
+  <input type="text" id="name" placeholder="Name">
+  <input type="date" id="date">
+  <input type="text" id="item" placeholder="Item">
+  <input type="number" id="price" placeholder="Price">
+  <input type="text" id="paidBy" placeholder="Paid By">
+  <button onclick="submitExpense()">Submit</button>
+
+  <div id="log"></div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbzQNw-kYKsBnG0IQ9zuEx_jRXNuMjbC8oJd1l53fydYtL7KD2zYsbh2IenHzXgeanzsKg/exec"; // replace this
+
+    function submitExpense() {
+      const data = {
+        action: "add",
+        name: document.getElementById("name").value,
+        date: document.getElementById("date").value,
+        item: document.getElementById("item").value,
+        price: document.getElementById("price").value,
+        paidBy: document.getElementById("paidBy").value
+      };
+
+      fetch(API, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.text())
+      .then(msg => {
+        alert("Expense added.");
+        document.getElementById("log").innerHTML += `<div class='entry'>${data.date} – ${data.item} – Rs.${data.price}</div>`;
+      });
+    }
+  </script>
+</body>
+</html>

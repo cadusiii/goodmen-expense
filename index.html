@@ -1,136 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Goodmen Expense</title>
-  <style>
-    body {
-      background-color: #e0f7fa;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    h2 {
-      color: #00796b;
-      text-align: center;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    button {
-      background-color: #00acc1;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #00838f;
-    }
-    .entry {
-      background-color: #ffffff;
-      border-left: 5px solid #00acc1;
-      margin-top: 15px;
-      padding: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.05);
-    }
-    #status {
-      font-weight: bold;
-      margin-top: 10px;
-    }
-  </style>
+  <title>Test Form</title>
 </head>
 <body>
-
-  <h2>Goodmen Expense</h2>
-
-  <input type="text" id="name" placeholder="Name">
-  <input type="date" id="date">
-  <input type="text" id="item" placeholder="Item / Category">
-  <input type="number" id="price" placeholder="Price (PKR)">
-  <input type="text" id="paidBy" placeholder="Paid By">
-
-  <button onclick="submitExpense()">Submit</button>
-
+  <h3>Goodmen Expense Test Submit</h3>
+  <form id="expenseForm">
+    <input name="name" placeholder="Name" />
+    <input name="date" type="date" />
+    <input name="item" placeholder="Item" />
+    <input name="price" type="number" />
+    <input name="paidBy" placeholder="Paid By" />
+    <button type="submit">Submit</button>
+  </form>
   <p id="status"></p>
 
-  <div id="log"></div>
-
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbzPYxU3H6JO-5U2TccbcWA8_VHGtFPduw-2cfvXLYFJ8zUgegwDCtp9FSOGZOa3c96myg/exec"; // <<== Replace this!
+    const API = "https://script.google.com/macros/s/AKfycbzQNw-kYKsBnG0IQ9zuEx_jRXNuMjbC8oJd1l53fydYtL7KD2zYsbh2IenHzXgeanzsKg/exec";
 
-    function submitExpense() {
-      const name = document.getElementById("name").value;
-      const date = document.getElementById("date").value;
-      const item = document.getElementById("item").value;
-      const price = document.getElementById("price").value;
-      const paidBy = document.getElementById("paidBy").value;
-
-      if (!name || !date || !item || !price || !paidBy) {
-        showStatus("❌ Please fill in all fields.", "red");
-        return;
-      }
-
-      const data = {
+    document.getElementById("expenseForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const jsonData = {
         action: "add",
-        name,
-        date,
-        item,
-        price,
-        paidBy
+        name: form.get("name"),
+        date: form.get("date"),
+        item: form.get("item"),
+        price: form.get("price"),
+        paidBy: form.get("paidBy")
       };
-
-      showStatus("Submitting...", "#00796b");
 
       fetch(API, {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(jsonData),
         headers: { "Content-Type": "application/json" }
       })
       .then(res => res.text())
-      .then(msg => {
-        if (msg.toLowerCase().includes("added")) {
-          showStatus("✅ Expense submitted successfully!", "green");
-          addEntryToLog(data);
-          clearForm();
-        } else {
-          showStatus("❌ Failed to submit. Try again.", "red");
-        }
+      .then(data => {
+        document.getElementById("status").textContent = "✅ Success: " + data;
       })
       .catch(err => {
-        console.error(err);
-        showStatus("❌ Network error. Please try again.", "red");
+        document.getElementById("status").textContent = "❌ Error: " + err;
       });
-    }
-
-    function showStatus(message, color) {
-      const status = document.getElementById("status");
-      status.innerText = message;
-      status.style.color = color;
-    }
-
-    function addEntryToLog(data) {
-      const log = document.getElementById("log");
-      const div = document.createElement("div");
-      div.className = "entry";
-      div.innerText = `${data.date} — ${data.item} — Rs.${data.price} — Paid by ${data.paidBy}`;
-      log.prepend(div);
-    }
-
-    function clearForm() {
-      document.getElementById("name").value = "";
-      document.getElementById("date").value = "";
-      document.getElementById("item").value = "";
-      document.getElementById("price").value = "";
-      document.getElementById("paidBy").value = "";
-    }
+    });
   </script>
-
 </body>
 </html>

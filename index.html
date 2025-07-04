@@ -2,37 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Goodmen Expense</title>
   <style>
-    body { font-family: sans-serif; background: #e0f7fa; color: #004d40; padding: 20px; }
-    input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; }
-    .entry { padding: 10px; margin: 10px 0; background: white; border-left: 5px solid #00acc1; }
+    body {
+      background-color: #e0f7fa;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      color: #00796b;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #00acc1;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #00838f;
+    }
+    .entry {
+      background-color: #ffffff;
+      border-left: 5px solid #00acc1;
+      margin-top: 15px;
+      padding: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+    #status {
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
+
   <h2>Goodmen Expense</h2>
+
   <input type="text" id="name" placeholder="Name">
   <input type="date" id="date">
-  <input type="text" id="item" placeholder="Item">
-  <input type="number" id="price" placeholder="Price">
+  <input type="text" id="item" placeholder="Item / Category">
+  <input type="number" id="price" placeholder="Price (PKR)">
   <input type="text" id="paidBy" placeholder="Paid By">
+
   <button onclick="submitExpense()">Submit</button>
+
+  <p id="status"></p>
 
   <div id="log"></div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbzQNw-kYKsBnG0IQ9zuEx_jRXNuMjbC8oJd1l53fydYtL7KD2zYsbh2IenHzXgeanzsKg/exec"; // replace this
+    const API = "PASTE_YOUR_GOOGLE_SCRIPT_WEB_APP_URL_HERE"; // <<== Replace this!
 
     function submitExpense() {
+      const name = document.getElementById("name").value;
+      const date = document.getElementById("date").value;
+      const item = document.getElementById("item").value;
+      const price = document.getElementById("price").value;
+      const paidBy = document.getElementById("paidBy").value;
+
+      if (!name || !date || !item || !price || !paidBy) {
+        showStatus("❌ Please fill in all fields.", "red");
+        return;
+      }
+
       const data = {
         action: "add",
-        name: document.getElementById("name").value,
-        date: document.getElementById("date").value,
-        item: document.getElementById("item").value,
-        price: document.getElementById("price").value,
-        paidBy: document.getElementById("paidBy").value
+        name,
+        date,
+        item,
+        price,
+        paidBy
       };
+
+      showStatus("Submitting...", "#00796b");
 
       fetch(API, {
         method: "POST",
@@ -41,10 +95,42 @@
       })
       .then(res => res.text())
       .then(msg => {
-        alert("Expense added.");
-        document.getElementById("log").innerHTML += `<div class='entry'>${data.date} – ${data.item} – Rs.${data.price}</div>`;
+        if (msg.toLowerCase().includes("added")) {
+          showStatus("✅ Expense submitted successfully!", "green");
+          addEntryToLog(data);
+          clearForm();
+        } else {
+          showStatus("❌ Failed to submit. Try again.", "red");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        showStatus("❌ Network error. Please try again.", "red");
       });
     }
+
+    function showStatus(message, color) {
+      const status = document.getElementById("status");
+      status.innerText = message;
+      status.style.color = color;
+    }
+
+    function addEntryToLog(data) {
+      const log = document.getElementById("log");
+      const div = document.createElement("div");
+      div.className = "entry";
+      div.innerText = `${data.date} — ${data.item} — Rs.${data.price} — Paid by ${data.paidBy}`;
+      log.prepend(div);
+    }
+
+    function clearForm() {
+      document.getElementById("name").value = "";
+      document.getElementById("date").value = "";
+      document.getElementById("item").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("paidBy").value = "";
+    }
   </script>
+
 </body>
 </html>
